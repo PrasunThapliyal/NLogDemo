@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NLogDemo.Services;
 
 namespace NLogDemo.Controllers
 {
@@ -17,15 +18,22 @@ namespace NLogDemo.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IWeatherService _weatherService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(
+            ILogger<WeatherForecastController> logger,
+            IWeatherService weatherService)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _weatherService = weatherService ?? throw new ArgumentNullException(nameof(weatherService));
         }
 
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            var currentWeather = _weatherService.GetCurrentWeather();
+            _logger.LogInformation($"Current Weather: {currentWeather}");
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
